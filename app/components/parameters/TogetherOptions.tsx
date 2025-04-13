@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction } from 'react';
+import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
 
 interface TogetherOptionsProps {
   widthInputValue: string;
@@ -31,16 +31,20 @@ export function TogetherOptions({
   setHeightInputValue,
   stepsInputValue,
   setStepsInputValue,
-  n, // Use n directly
+  n,
   setN,
-  // nInputValue removed
-  // setNInputValue removed
   responseFormat,
   setResponseFormat,
   handleNumericInputChange,
   isLoading,
   setFormError,
 }: TogetherOptionsProps) {
+  const [nInputValue, setNInputValue] = useState(String(n));
+
+  useEffect(() => {
+    setNInputValue(String(n));
+  }, [n]);
+
   return (
     <div className="space-y-4 border-t pt-4 mt-4">
       <h3 className="text-md font-semibold text-gray-600">
@@ -62,12 +66,7 @@ export function TogetherOptions({
           />
         </div>
         <div>
-          <label
-            htmlFor="height-together"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Height (px)
-          </label>
+          <label htmlFor="height-together" className="block text-sm font-medium text-gray-700 mb-1">Height (px)</label>
           <input type="number" id="height-together" name="height-together" step="64" min="256" max="2048"
             value={heightInputValue}
             onChange={(e) => handleNumericInputChange( e, () => {}, setHeightInputValue, 1)}
@@ -89,8 +88,8 @@ export function TogetherOptions({
         <div>
           <label htmlFor="n-together" className="block text-sm font-medium text-gray-700 mb-1">Images (1-4)</label>
           <input type="number" id="n-together" name="n-together" min="1" max="4"
-            value={String(n)} // Use n for value
-            onChange={(e) => handleNumericInputChange(e, setN, null, 1, 4)} // Pass null for inputSetter
+            value={nInputValue}
+            onChange={(e) => handleNumericInputChange(e, setN, setNInputValue, 1, 4)}
             disabled={isLoading}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition duration-150 ease-in-out disabled:opacity-50"
           />

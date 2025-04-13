@@ -5,6 +5,8 @@ const together = new Together({
   apiKey: process.env.TOGETHER_API_KEY,
 });
 
+export const maxDuration = 40;
+
 export async function POST(request: Request) {
   try {
     const {

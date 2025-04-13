@@ -10,7 +10,7 @@ import GeneratedImages from "./components/GeneratedImages";
 
 // --- Component ---
 const ImageGeneratorPage: NextPage = () => {
-  const [n, setN] = useState<number>(3);
+  const [n, setN] = useState<number>(1);
 
   // UI State
   const [generatedImages, setGeneratedImages] = useState<({ url: string } | { b64_json: string })[]>([]);
