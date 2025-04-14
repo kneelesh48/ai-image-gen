@@ -24,4 +24,9 @@ export const providers: Provider[] = [
       name: "xAI",
       models: [{ id: "grok-2-image", name: "grok-2-image" }],
     },
+    {
+      id: "google",
+      name: "Google",
+      models: [{ id: "gemini-2.0-flash-exp", name: "gemini-2.0-flash" }],
+    },
   ];
