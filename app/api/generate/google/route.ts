@@ -31,16 +31,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     console.log(prompt);
 
-    const safetySettings = [
-      {
-        category: "HARM_CATEGORY_HARASSMENT",
-        threshold: "BLOCK_NONE",
-      },
-      {
-        category: "HARM_CATEGORY_HATE_SPEECH",
-        threshold: "BLOCK_NONE",
-      },
-    ];
+    // const safetySettings = [
+    //   {
+    //     category: "HARM_CATEGORY_HARASSMENT",
+    //     threshold: "BLOCK_NONE",
+    //   },
+    //   {
+    //     category: "HARM_CATEGORY_HATE_SPEECH",
+    //     threshold: "BLOCK_NONE",
+    //   },
+    // ];
     
     const generationConfig = {
       temperature: 1,
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         "text",
       ],
       responseMimeType: "text/plain",
-      safetySettings: safetySettings,
+      // safetySettings: safetySettings,
     };
     
     const response = await ai.models.generateContent({
