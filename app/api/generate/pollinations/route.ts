@@ -8,7 +8,7 @@ async function fetchImageAsBase64(url: string): Promise<string> {
         let errorBody = '';
         try {
             errorBody = await response.text();
-        } catch { /* ignore */ } // No need for the error variable binding
+        } catch { /* ignore */ }
         throw new Error(`Failed to fetch image from Pollinations: ${response.status} ${response.statusText}. ${errorBody}`);
     }
     const buffer = await response.arrayBuffer();
@@ -20,14 +20,13 @@ export async function POST(request: Request) {
     const body = await request.json();
     const {
       prompt,
-      model = "flux", // Default model for pollinations
+      model = "flux",
       seed = Date.now(),
       width = 1024,
       height = 1024,
       nologo = true,
       private_image = true,
       enhance = false,
-      // 'n' and 'response_format' are not directly applicable here as Pollinations returns one image directly
     } = body;
 
     // Basic validation
@@ -46,16 +45,14 @@ export async function POST(request: Request) {
         width: String(width),
         height: String(height),
         nologo: String(nologo),
-        private: String(private_image), // Use the renamed variable
+        private: String(private_image),
         enhance: String(enhance),
     });
 
     const fullUrl = `${url}?${params.toString()}`;
     console.log(`Fetching from Pollinations URL: ${fullUrl}`);
 
-    // Pollinations returns the image directly. Fetch and encode as b64_json.
     const base64Image = await fetchImageAsBase64(fullUrl);
-    // Return in a structure consistent with the other API (array of objects)
     return NextResponse.json({ data: [{ b64_json: base64Image }] });
 
   } catch (error: unknown) {
