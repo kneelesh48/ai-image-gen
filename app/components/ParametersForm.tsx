@@ -10,6 +10,7 @@ import { useParameterPersistence } from './parameters/hooks/useParameterPersiste
 
 import { ProviderModelSelector } from './parameters/ProviderModelSelector';
 import { PromptInput } from './parameters/PromptInput';
+import { NumberInput } from './parameters/NumberInput';
 import { XaiOptions } from './parameters/XaiOptions';
 import { TogetherOptions } from './parameters/TogetherOptions';
 import { PollinationsOptions } from './parameters/PollinationsOptions';
@@ -112,9 +113,7 @@ const ParametersForm: React.FC<ParametersFormProps> = ({isLoading, onGenerate, n
     let requestBody: ApiRequestBody | null = null;
 
     try {
-      // Construct Request Body based on Provider
       if (selectedProviderId === "xai") {
-        // Validate n directly from props
         if (n < 1 || n > 10) {
           throw new Error("Number of images (n) must be between 1 and 10 for xAI.");
         }
@@ -135,9 +134,9 @@ const ParametersForm: React.FC<ParametersFormProps> = ({isLoading, onGenerate, n
         if (isNaN(parsedWidth) || parsedWidth <= 0) throw new Error("Width must be a positive number for Together.");
         if (isNaN(parsedHeight) || parsedHeight <= 0) throw new Error("Height must be a positive number for Together.");
         if (isNaN(parsedSteps) || parsedSteps <= 0) throw new Error("Steps must be a positive number for Together.");
-         // Ensure n state (from parent) matches input before submitting
-        // if (n !== parsedN) setN(parsedN); // Removed pre-submission sync
         requestBody = { prompt, model: selectedModelId, width: parsedWidth, height: parsedHeight, steps: parsedSteps, n: n, response_format: responseFormat as "url" | "base64" };
+      } else if (selectedProviderId === "google") {
+        requestBody = { prompt: `Generate ${n} images of\n\n${prompt}`, model: selectedModelId };
       } else {
         throw new Error(`Unsupported provider selected: ${selectedProviderId}`);
       }
@@ -219,8 +218,8 @@ const ParametersForm: React.FC<ParametersFormProps> = ({isLoading, onGenerate, n
         <ProviderModelSelector
           providers={providers}
           selectedProviderId={selectedProviderId}
-          selectedModelId={selectedModelId}
           onProviderChange={handleProviderChange}
+          selectedModelId={selectedModelId}
           onModelChange={handleModelChange}
           isLoading={isLoading}
           availableModels={availableModels}
@@ -233,17 +232,26 @@ const ParametersForm: React.FC<ParametersFormProps> = ({isLoading, onGenerate, n
           isLoading={isLoading}
         />
 
+        {/* Number of Images Input */}
+        <NumberInput
+          label={`Images (${selectedProviderId === "xai" ? "1-10" : "1-4"})`}
+          value={n}
+          setValue={setN}
+          min={1}
+          max={selectedProviderId === "xai" ? 10 : 4}
+          disabled={isLoading}
+          handleNumericInputChange={handleNumericInputChange}
+        />
+
+
         {/* --- Conditionally Rendered Parameters --- */}
 
         {/* Parameters for xAI */}
         {selectedProviderId === "xai" && (
           <XaiOptions
-            n={n} // Pass n prop
-            responseFormat={responseFormat as "url" | "b64_json"} // Cast for the component
-            setN={setN} // Pass parent setter
+            responseFormat={responseFormat as "url" | "b64_json"}
             setResponseFormat={setResponseFormat}
             isLoading={isLoading}
-            handleNumericInputChange={handleNumericInputChange}
             setFormError={setFormError}
           />
         )}
@@ -257,8 +265,6 @@ const ParametersForm: React.FC<ParametersFormProps> = ({isLoading, onGenerate, n
             setHeightInputValue={setHeightInputValue}
             stepsInputValue={stepsInputValue}
             setStepsInputValue={setStepsInputValue}
-            n={n}
-            setN={setN}
             responseFormat={responseFormat as "url" | "base64"}
             setResponseFormat={setResponseFormat}
             isLoading={isLoading}
@@ -282,6 +288,7 @@ const ParametersForm: React.FC<ParametersFormProps> = ({isLoading, onGenerate, n
             setPrivateImage={setPrivateImage}
             enhance={enhance}
             setEnhance={setEnhance}
+
             isLoading={isLoading}
             handleNumericInputChange={handleNumericInputChange}
             handleRandomSeed={handleRandomSeed}
