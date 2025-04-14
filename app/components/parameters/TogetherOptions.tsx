@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 
 interface TogetherOptionsProps {
   widthInputValue: string;
@@ -7,18 +7,14 @@ interface TogetherOptionsProps {
   setHeightInputValue: Dispatch<SetStateAction<string>>;
   stepsInputValue: string;
   setStepsInputValue: Dispatch<SetStateAction<string>>;
-  n: number; // Receive n directly
-  setN: Dispatch<SetStateAction<number>>;
-  // nInputValue removed
-  // setNInputValue removed
-  responseFormat: "url" | "base64"; // Specific to Together
-  setResponseFormat: Dispatch<SetStateAction<"url" | "base64" | "b64_json">>; // Allow wider type for setter if state is shared
+  responseFormat: "url" | "base64";
+  setResponseFormat: Dispatch<SetStateAction<"url" | "base64" | "b64_json">>;
   handleNumericInputChange: (
     e: React.ChangeEvent<HTMLInputElement>,
-    setter: Dispatch<SetStateAction<number>>, // The numeric state setter
-    inputSetter?: Dispatch<SetStateAction<string>> | null, // The string input state setter (optional)
-    min?: number | null, // Optional min value
-    max?: number | null // Optional max value
+    setter: Dispatch<SetStateAction<number>>,
+    inputSetter?: Dispatch<SetStateAction<string>> | null,
+    min?: number | null,
+    max?: number | null
   ) => void;
   isLoading: boolean;
   setFormError: Dispatch<SetStateAction<string | null>>;
@@ -31,19 +27,12 @@ export function TogetherOptions({
   setHeightInputValue,
   stepsInputValue,
   setStepsInputValue,
-  n,
-  setN,
   responseFormat,
   setResponseFormat,
   handleNumericInputChange,
   isLoading,
   setFormError,
 }: TogetherOptionsProps) {
-  const [nInputValue, setNInputValue] = useState(String(n));
-
-  useEffect(() => {
-    setNInputValue(String(n));
-  }, [n]);
 
   return (
     <div className="space-y-4 border-t pt-4 mt-4">
@@ -52,12 +41,7 @@ export function TogetherOptions({
       </h3>
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label
-            htmlFor="width-together"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Width (px)
-          </label>
+          <label htmlFor="width-together" className="block text-sm font-medium text-gray-700 mb-1">Width (px)</label>
           <input type="number" id="width-together" name="width-together" step="64" min="256" max="2048"
             value={widthInputValue}
             onChange={(e) => handleNumericInputChange(e, () => {}, setWidthInputValue, 1)}
@@ -86,26 +70,17 @@ export function TogetherOptions({
           />
         </div>
         <div>
-          <label htmlFor="n-together" className="block text-sm font-medium text-gray-700 mb-1">Images (1-4)</label>
-          <input type="number" id="n-together" name="n-together" min="1" max="4"
-            value={nInputValue}
-            onChange={(e) => handleNumericInputChange(e, setN, setNInputValue, 1, 4)}
+          <label htmlFor="responseFormat-together" className="block text-sm font-medium text-gray-700 mb-1">Response Format</label>
+          <select id="responseFormat-together" name="responseFormat-together"
+            value={responseFormat}
+            onChange={(e) => {setResponseFormat(e.target.value as "url" | "base64" | "b64_json"); setFormError(null);}}
             disabled={isLoading}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition duration-150 ease-in-out disabled:opacity-50"
-          />
+            className="w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition duration-150 ease-in-out disabled:opacity-50"
+          >
+            <option value="url">URL</option>
+            <option value="base64">Base64</option>
+          </select>
         </div>
-      </div>
-      <div>
-        <label htmlFor="responseFormat-together" className="block text-sm font-medium text-gray-700 mb-1">Response Format</label>
-        <select id="responseFormat-together" name="responseFormat-together"
-          value={responseFormat}
-          onChange={(e) => {setResponseFormat(e.target.value as "url" | "base64" | "b64_json"); setFormError(null);}}
-          disabled={isLoading}
-          className="w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition duration-150 ease-in-out disabled:opacity-50"
-        >
-          <option value="url">URL</option>
-          <option value="base64">Base64</option>
-        </select>
       </div>
     </div>
   );
