@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Together from 'together-ai';
 
 export const maxDuration = 40;
+export const runtime = 'edge';
 
 const together = new Together({apiKey: process.env.TOGETHER_API_KEY});
 

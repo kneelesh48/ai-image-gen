@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 
 export const maxDuration = 40;
+export const runtime = 'edge';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 

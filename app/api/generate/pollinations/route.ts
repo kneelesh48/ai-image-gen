@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 export const maxDuration = 40;
+export const runtime = 'edge';
 
 async function fetchImageAsBase64(url: string): Promise<string> {
     const response = await fetch(url);
