@@ -1,14 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import Together from 'together-ai';
-
-const together = new Together({
-  apiKey: process.env.TOGETHER_API_KEY,
-});
 
 export const maxDuration = 40;
 
-export async function POST(request: Request) {
+const together = new Together({apiKey: process.env.TOGETHER_API_KEY});
+
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    const body = await request.json();
+
     const {
       prompt,
       model = "black-forest-labs/FLUX.1-schnell-Free",
@@ -17,14 +17,10 @@ export async function POST(request: Request) {
       steps = 4,
       n = 1,
       response_format = "base64",
-    } = await request.json();
+    } = body;
 
     if (!prompt) {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
-    }
-
-    if (!process.env.TOGETHER_API_KEY) {
-        return NextResponse.json({ error: 'TOGETHER_API_KEY environment variable not set' }, { status: 500 });
     }
 
     console.log(`Generating image with prompt: ${prompt}, model: ${model}`);
@@ -36,9 +32,7 @@ export async function POST(request: Request) {
       height: height,
       steps: steps,
       n: n,
-      response_format: response_format as 'url' | 'base64', // Cast to expected type
-      // The 'stop' parameter seems incorrect for image generation, removing it.
-      // stop: []
+      response_format: response_format as 'url' | 'base64',
     });
 
     console.log("Image generation successful.");
@@ -57,7 +51,6 @@ export async function POST(request: Request) {
 
   } catch (error) {
     console.error('Error generating image with Together AI:', error);
-    // Provide a more specific error message if possible
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
     return NextResponse.json({ error: 'Failed to generate image', details: errorMessage }, { status: 500 });
   }

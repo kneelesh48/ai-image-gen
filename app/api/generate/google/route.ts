@@ -1,11 +1,9 @@
-import { GoogleGenAI } from "@google/genai";
 import { NextRequest, NextResponse } from "next/server";
+import { GoogleGenAI } from "@google/genai";
 
 export const maxDuration = 40;
 
-const apiKey = process.env.GEMINI_API_KEY;
-
-const ai = new GoogleGenAI({ apiKey });
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 interface ResponseData {
   images: Array<{
@@ -25,13 +23,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
      } = body;
 
     if (!prompt) {
-      return NextResponse.json(
-        { error: "Missing prompt in request body" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Missing prompt in request body" }, { status: 400 });
     }
 
-    console.log(prompt);
+    console.log(`Generating image with prompt: ${prompt}, model: ${model}`);
 
     // const safetySettings = [
     //   {
@@ -43,24 +38,22 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     //     threshold: "BLOCK_NONE",
     //   },
     // ];
-    
-    const generationConfig = {
-      temperature: 1,
-      topP: 0.95,
-      topK: 40,
-      maxOutputTokens: 8192,
-      responseModalities: [
-        "image",
-        "text",
-      ],
-      responseMimeType: "text/plain",
-      // safetySettings: safetySettings,
-    };
-    
+
     const response = await ai.models.generateContent({
       model: model,
       contents: prompt,
-      config: generationConfig,
+      config: {
+        temperature: 1,
+        topP: 0.95,
+        topK: 40,
+        maxOutputTokens: 8192,
+        responseModalities: [
+          "image",
+          "text",
+        ],
+        responseMimeType: "text/plain",
+        // safetySettings: safetySettings,
+      },
     });
 
     const responseData: ResponseData = {
@@ -87,9 +80,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json(responseData);
   } catch (error) {
     console.error("Error generating images:", error);
-    return NextResponse.json(
-      { error: "Failed to generate images" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to generate images" }, { status: 500 });
   }
 }
