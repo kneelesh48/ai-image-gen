@@ -37,6 +37,7 @@ interface TogetherRequestBody extends BaseRequestBody {
 }
 
 export type ApiRequestBody =
+  | BaseRequestBody
   | XaiRequestBody
   | PollinationsRequestBody
   | TogetherRequestBody;
