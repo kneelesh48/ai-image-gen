@@ -8,9 +8,9 @@ import { ImageIcon, Loader2, Clock } from "lucide-react";
 interface GeneratedImagesProps {
   isLoading: boolean;
   error: string | null;
-  generatedImages: ({ url: string } | { b64_json: string })[];
+  generatedImages: ({ url?: string;b64_json?: string })[];
   generationTime: number | null;
-  n: number; // Needed for skeleton loaders
+  n: number;
 }
 
 // --- Component ---
@@ -21,9 +21,6 @@ const GeneratedImages: React.FC<GeneratedImagesProps> = ({
   generationTime,
   n,
 }) => {
-  const width = 1024;
-  const height = 1024;
-
   return (
     <div className="lg:col-span-1">
       <div className="flex justify-between items-center mb-6">
@@ -69,27 +66,25 @@ const GeneratedImages: React.FC<GeneratedImagesProps> = ({
               key={index}
               className="aspect-square bg-gray-200 rounded-lg overflow-hidden shadow-md border border-gray-300 relative group"
             >
-              {"url" in imgData ? (
+              {imgData.url ? (
                 <Image
                   src={imgData.url}
                   alt={`Generated image ${index + 1}`}
                   fill
-                  className="object-cover"
+                  className="w-full h-full object-contain"
                 />
-              ) : "b64_json" in imgData ? (
+              ) : imgData.b64_json ? (
                 <Image
                   src={`data:image/png;base64,${imgData.b64_json}`}
                   alt={`Generated image ${index + 1}`}
-                  width={width}
-                  height={height}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="w-full h-full object-contain"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-500">
                   Invalid image data
                 </div>
               )}
-              {/* Download button in bottom right corner - only visible on hover */}
               <a
                 href={
                   "url" in imgData
