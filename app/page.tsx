@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import type { NextPage } from "next";
 import { Wand2 } from "lucide-react";
 
@@ -8,17 +8,15 @@ import type { ApiRequestBody } from "./components/parameters/types";
 import ParametersForm from "./components/ParametersForm";
 import GeneratedImages from "./components/GeneratedImages";
 
-// --- Component ---
 const ImageGeneratorPage: NextPage = () => {
   const [n, setN] = useState<number>(1);
 
-  // UI State
   const [generatedImages, setGeneratedImages] = useState<({ url: string } | { b64_json: string })[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [generationTime, setGenerationTime] = useState<number | null>(null);
 
-  // --- Image Generation Handler ---
+
   const handleGenerate = async (providerId: string, requestBody: ApiRequestBody) => {
     setIsLoading(true);
     setError(null);
@@ -33,6 +31,8 @@ const ImageGeneratorPage: NextPage = () => {
       apiUrl = "/api/generate/pollinations";
     } else if (providerId === "together") {
       apiUrl = "/api/generate/together";
+    } else if (providerId === "google") {
+      apiUrl = "/api/generate/google";
     } else {
       setError(`Unsupported provider selected: ${providerId}`);
       setIsLoading(false);
@@ -55,10 +55,15 @@ const ImageGeneratorPage: NextPage = () => {
       // Process Response
       if (data.data && Array.isArray(data.data)) {
         setGeneratedImages(data.data);
-      } else if (providerId === "together" && data.base64Json) { // Check providerId here
+      } else if (providerId === "together" && data.base64Json) {
         setGeneratedImages([{ b64_json: data.base64Json }]);
-      } else if (providerId === "together" && data.imageUrl) { // Check providerId here
+      } else if (providerId === "together" && data.imageUrl) {
         setGeneratedImages([{ url: data.imageUrl }]);
+      } else if (providerId === "google" && data.images) {
+        const formattedImages = data.images.map((img: { base64Data: string }) => ({
+          b64_json: img.base64Data
+        }));
+        setGeneratedImages(formattedImages);
       } else {
         console.warn("API response did not contain expected data format:", data);
         setGeneratedImages([]);
