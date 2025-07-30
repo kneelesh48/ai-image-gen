@@ -8,12 +8,18 @@ import type { ApiRequestBody } from "./components/parameters/types";
 import ParametersForm from "./components/ParametersForm";
 import GeneratedImages from "./components/GeneratedImages";
 
-const ImageGeneratorPage: NextPage = () => {
-  const [n, setN] = useState<number>(1);
+interface RunwareImageResponse {
+  url?: string;
+  base64?: string;
+  dataURI?: string;
+}
 
-  const [generatedImages, setGeneratedImages] = useState<({ url: string } | { b64_json: string })[]>([]);
+const ImageGeneratorPage: NextPage = () => {
+  const [n, setN] = useState<number>(2);
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [generatedImages, setGeneratedImages] = useState<({ url: string } | { b64_json: string })[]>([]);
   const [generationTime, setGenerationTime] = useState<number | null>(null);
 
 
@@ -24,23 +30,16 @@ const ImageGeneratorPage: NextPage = () => {
     setGenerationTime(null);
     const startTime = performance.now();
 
-    let apiUrl = "";
-    if (providerId === "xai") {
-      apiUrl = "/api/generate/xai";
-    } else if (providerId === "pollinations") {
-      apiUrl = "/api/generate/pollinations";
-    } else if (providerId === "together") {
-      apiUrl = "/api/generate/together";
-    } else if (providerId === "google") {
-      apiUrl = "/api/generate/google";
-    } else {
+    const supportedProviders = ["together", "xai", "pollinations", "google", "runware"];
+
+    if (!supportedProviders.includes(providerId)) {
       setError(`Unsupported provider selected: ${providerId}`);
       setIsLoading(false);
       return;
     }
 
     try {
-      const response = await fetch(apiUrl, {
+      const response = await fetch(`/api/generate/${providerId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestBody),
@@ -49,7 +48,8 @@ const ImageGeneratorPage: NextPage = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || `API error! status: ${response.status}`);
+        const errorMessage = data.error?.message || data.error || `API error! status: ${response.status}`;
+        throw new Error(errorMessage);
       }
 
       // Process Response
@@ -64,13 +64,21 @@ const ImageGeneratorPage: NextPage = () => {
           b64_json: img.base64Data
         }));
         setGeneratedImages(formattedImages);
+      } else if (providerId === "runware" && data.images) {
+        const formattedImages = data.images.map((img: RunwareImageResponse) => {
+          if (img.url) return { url: img.url };
+          if (img.base64) return { b64_json: img.base64 };
+          if (img.dataURI) return { url: img.dataURI };
+          return { url: "" };
+        });
+        setGeneratedImages(formattedImages);
       } else {
         console.warn("API response did not contain expected data format:", data);
         setGeneratedImages([]);
       }
     } catch (err: unknown) {
       console.error("Generation failed:", err);
-      setError(err instanceof Error ? `Generation failed: ${err.message}` : "An unknown error occurred.");
+      setError(err instanceof Error ? err.message : "An unknown error occurred.");
       setGeneratedImages([]);
     } finally {
       const endTime = performance.now();
