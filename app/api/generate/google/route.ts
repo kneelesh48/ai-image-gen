@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 
 export const maxDuration = 40;
-export const runtime = 'edge';
+export const runtime = "edge";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 interface ResponseData {
   images: Array<{
-    mimeType: string|undefined;
-    base64Data: string|undefined;
+    mimeType: string | undefined;
+    base64Data: string | undefined;
   }>;
   text: string;
 }
@@ -18,13 +18,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const body = await request.json();
 
-    const { 
-      prompt,
-      model = "gemini-2.0-flash-exp",
-     } = body;
+    const { prompt, model = "gemini-2.0-flash-exp" } = body;
 
     if (!prompt) {
-      return NextResponse.json({ error: "Missing prompt in request body" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing prompt in request body" },
+        { status: 400 }
+      );
     }
 
     console.log(`Generating image with prompt: ${prompt}, model: ${model}`);
@@ -48,10 +48,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         topP: 0.95,
         topK: 40,
         maxOutputTokens: 8192,
-        responseModalities: [
-          "image",
-          "text",
-        ],
+        responseModalities: ["image", "text"],
         responseMimeType: "text/plain",
         // safetySettings: safetySettings,
       },
@@ -64,7 +61,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     if (!response?.candidates?.[0]?.content?.parts) {
       console.error("No parts found in response.");
-      return NextResponse.json({ error: "Empty response from Google Generative AI" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Empty response from Google Generative AI" },
+        { status: 500 }
+      );
     }
 
     for (const part of response?.candidates[0]?.content?.parts) {
@@ -74,13 +74,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         responseData.images.push({
           mimeType: part.inlineData.mimeType,
           base64Data: part.inlineData.data,
-        })
+        });
       }
     }
 
     return NextResponse.json(responseData);
   } catch (error) {
     console.error("Error generating images:", error);
-    return NextResponse.json({ error: "Failed to generate images" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to generate images" },
+      { status: 500 }
+    );
   }
 }
