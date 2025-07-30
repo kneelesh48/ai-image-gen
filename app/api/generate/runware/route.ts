@@ -84,7 +84,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Map the response to match the expected format
-    const responseImages = images.map((image: any) => ({
+    interface RunwareImage {
+      imageURL?: string;
+      imageBase64Data?: string;
+      imageDataURI?: string;
+      taskUUID?: string;
+      imageUUID?: string;
+    }
+
+    const responseImages = images.map((image: RunwareImage) => ({
       url: image.imageURL,
       base64: image.imageBase64Data,
       dataURI: image.imageDataURI,
@@ -101,13 +109,26 @@ export async function POST(request: NextRequest) {
         parameters: requestParams,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Runware API error:", error);
+
+    let errorMessage = "Failed to generate image with Runware";
+    let errorDetails = error;
+
+    if (typeof error === "object" && error !== null) {
+      if ("message" in error && typeof (error).message === "string") {
+        errorMessage = (error).message;
+      }
+      if ("response" in error && typeof (error).response === "object" && (error).response !== null) {
+        const responseObj = (error as { response?: { data?: unknown } }).response;
+        errorDetails = responseObj && "data" in responseObj ? responseObj.data : error;
+      }
+    }
 
     return NextResponse.json(
       {
-        error: error?.message || "Failed to generate image with Runware",
-        details: error?.response?.data || error,
+        error: errorMessage,
+        details: errorDetails,
       },
       { status: 500 }
     );
