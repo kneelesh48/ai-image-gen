@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Runware } from "@runware/sdk-js";
 
 export const maxDuration = 60;
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 interface ILora {
   model: string;
