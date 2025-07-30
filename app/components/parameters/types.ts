@@ -36,10 +36,37 @@ interface TogetherRequestBody extends BaseRequestBody {
   response_format: "url" | "base64";
 }
 
+interface ILora {
+  model: string;
+  weight: number;
+}
+
+interface RunwareRequestBody extends BaseRequestBody {
+  width: number;
+  height: number;
+  steps: number;
+  CFGScale: number;
+  seed?: number;
+  negativePrompt?: string;
+  numberResults: number;
+  outputType: "URL" | "base64Data" | "dataURI";
+  lora?: ILora[];
+}
+
 export type ApiRequestBody =
   | BaseRequestBody
   | XaiRequestBody
   | PollinationsRequestBody
-  | TogetherRequestBody;
+  | TogetherRequestBody
+  | RunwareRequestBody;
 
-  export type { Model, Provider, BaseRequestBody, XaiRequestBody, PollinationsRequestBody, TogetherRequestBody };
+export type {
+  Model,
+  Provider,
+  BaseRequestBody,
+  XaiRequestBody,
+  PollinationsRequestBody,
+  TogetherRequestBody,
+  RunwareRequestBody,
+  ILora,
+};
